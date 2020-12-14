@@ -68,9 +68,9 @@ class SearchEngine(object):
         db = {}
         for r in results:
             if r[0] not in db:
-                db[r[0]] = r[1:]
+                db[r[0]] = list(r[1:])
 
-            print(r[0], r[1])
+            # print(r[0], r[1])
         return db
 
     def load_txt(self, file_path):
@@ -113,7 +113,7 @@ class SearchEngine(object):
         results = []
         for i in idx:
             doc_id = int(self.corpus_idf[self.corpus[i]])
-            results.append(self.db[doc_id])
+            results.append([doc_id] + self.db[doc_id])
         print(results)
         return results
 
@@ -137,7 +137,7 @@ class SearchEngine(object):
         results = []
         for i in idx:
             doc_id = int(self.corpus_idf[self.corpus[i]])
-            results.append(self.db[doc_id][0])
+            results.append([doc_id] + self.db[doc_id])
         print(results)
         return results
 
@@ -146,7 +146,7 @@ class SearchEngine(object):
         for cn_name in self.cn2eng_dic.keys():
             if query in cn_name:
                 doc_id = int(self.cn2eng_dic[cn_name][0])
-                results.append(self.db[doc_id])
+                results.append([doc_id] + self.db[doc_id])
         print(results)
         return results
 
