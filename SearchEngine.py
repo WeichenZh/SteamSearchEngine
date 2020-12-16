@@ -11,7 +11,8 @@ from rank_bm25 import BM25Okapi
 
 from my_suggestor import WordSuggestor
 from my_suggestor import cosine_sim
-
+import sys
+sys.path.append('/Users/jiangpuhua/Documents/class/549/project/SteamSearchEngine/steam_search')
 from config import config
 
 
@@ -114,7 +115,8 @@ class SearchEngine(object):
         for i in idx:
             doc_id = int(self.corpus_idf[self.corpus[i]])
             results.append([doc_id] + self.db[doc_id])
-        print(results)
+        # for game in results:
+        #     print(game[:3])
         return results
 
     def search_game(self, query, lamb=3):
@@ -138,7 +140,9 @@ class SearchEngine(object):
         for i in idx:
             doc_id = int(self.corpus_idf[self.corpus[i]])
             results.append([doc_id] + self.db[doc_id])
-        print(results)
+        #print(results)
+        # for game in results:
+        #     print(game[:3])
         return results
 
     def cross_lang_search(self, query):
@@ -147,7 +151,7 @@ class SearchEngine(object):
             if query in cn_name:
                 doc_id = int(self.cn2eng_dic[cn_name][0])
                 results.append([doc_id] + self.db[doc_id])
-        print(results)
+        #print(results)
         return results
 
     def testBM25(self, mode):
@@ -257,14 +261,101 @@ class SearchEngine(object):
 
         ndcg = dcg / idcg
         return ndcg
+    def test_auc(self):
+        db = self.db
+        #print(db)
+        id_list = list(db.keys())
+        test_num = 200
+        id_list_sample = random.sample(id_list,test_num)
+        
+        test_list = {}
+        for i in range(test_num):
+            test_list[id_list_sample[i]] = db[id_list_sample[i]][0]
+        auc_num = 0
+        for ids in test_list.keys():
+            game_name = test_list[ids]
+            results = self.search_game(game_name)
+            for game in results:
+                if game[0] == ids:
+                    auc_num += 1
+                    break
+        print('test_num:',test_num,'accuracy',auc_num/test_num)
+    def test_auc_miss(self):
+        db = self.db
+        #print(db)
+        id_list = list(db.keys())
+        test_num = 200
+        id_list_sample = random.sample(id_list,test_num)
+        alph = random.sample('qwertyuiopasdfghjklzxcvbnm',1)
+        test_list = {}
+        for i in range(test_num):
+            test_list[id_list_sample[i]] = db[id_list_sample[i]][0]
+        auc_num = 0
+        for ids in test_list.keys():
+            game_name = test_list[ids]
+
+            num = random.randint(0,len(game_name)-1)
+            change = game_name[num]
+            a = game_name.replace(change,''.join(alph),1)
+            results = self.search_game(a)
+            for game in results:
+                if game[0] == ids:
+                    auc_num += 1
+                    break
+        print('test_num:',test_num,'accuracy',auc_num/test_num)
+
+    def test_auc_zh(self):
+        db = self.db
+        #print(db)
+        id_list = list(db.keys())
+        test_num = 200
+        id_list_sample = random.sample(id_list,test_num)
+        
+        test_list = {}
+        for i in range(test_num):
+            test_list[id_list_sample[i]] = db[id_list_sample[i]][-1]
+        auc_num = 0
+        for ids in test_list.keys():
+            game_name = test_list[ids]
+            results = self.cross_lang_search(game_name)
+            for game in results:
+                if game[0] == ids:
+                    auc_num += 1
+                    break
+        print('test_num:',test_num,'accuracy',auc_num/test_num)
+
+    def test_auc_zh_steam(self):
+        db = self.db
+        #print(db)
+        id_list = list(db.keys())
+        test_num = 200
+        id_list_sample = random.sample(id_list,test_num)
+        
+        test_list = {}
+        for i in range(test_num):
+            test_list[id_list_sample[i]] = db[id_list_sample[i]][-1]
+        return test_list
+        # auc_num = 0
+        # for ids in test_list.keys():
+        #     game_name = test_list[ids]
+        #     results = self.cross_lang_search(game_name)
+        #     for game in results:
+        #         if game[0] == ids:
+        #             auc_num += 1
+        #             break
+        # print('test_num:',test_num,'accuracy',auc_num/test_num)
 
 
-PS = PorterStemmer()
-search_engine = SearchEngine(config, word_tokenize, PS, isStemming=False)
-search_engine.test_spell_suggestor()
+if __name__ == '__main__':
+    PS = PorterStemmer()
+    search_engine = SearchEngine(config, word_tokenize, PS, isStemming=False)
+    search_engine.test_auc_miss()
+    # search_engine.test_auc_zh()
+# #search_engine.test_spell_suggestor()
 
-search_engine.testBM25(mode=1)
-search_engine.testBM25(mode=0)
-search_engine.search_game('Call of dust')
-search_engine.search('explore the space')
-search_engine.cross_lang_search('巫师3')
+# # search_engine.testBM25(mode=1)
+# # search_engine.testBM25(mode=0)
+# search_engine.search_game('Call of dust')
+# print('---------')
+# search_engine.search('explore the space')
+# # search_engine.cross_lang_search('巫师3')
