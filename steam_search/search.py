@@ -494,6 +494,7 @@ def load_database(game_dict):
 def test_steam_zh(test_list):
         test_num = 200
         auc_num = 0
+        
         for ids in test_list.keys():
             game_name = test_list[ids]
             
@@ -508,13 +509,32 @@ def test_steam_zh(test_list):
                     break
         print('test_num:',test_num,'accuracy',auc_num/test_num)
 
+def test_steam_miss(test_list):
+        test_num = 200
+        auc_num = 0
+        alph = random.sample('qwertyuiopasdfghjklzxcvbnm',1)
+        for ids in test_list.keys():
+            game_name = test_list[ids]
+            num = random.randint(0,len(game_name)-1)
+            change = game_name[num]
+            new_name = game_name.replace(change,''.join(alph),1)
+            results = get_search_results("https://store.steampowered.com/search/?term=",new_name)
+            if results is None:
+                continue
+            if len(results) > 10:
+                results = results[:10]
+            for game in results:
+                if str(game['game_id']) == str(ids):
+                    auc_num += 1
+                    break
+        print('test_num:',test_num,'accuracy',auc_num/test_num)
 
 if __name__ == "__main__":
     CACHE_DICT = open_cache()
     PS = PorterStemmer()
     search_engine = SearchEngine(config, word_tokenize, PS, isStemming=False)
     # test_list = search_engine.test_auc_zh_steam()
-    # test_steam_zh(test_list)
+    # test_steam_miss(test_list)
     
     app.run(debug=True)
     

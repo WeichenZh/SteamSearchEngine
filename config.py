@@ -2,7 +2,7 @@ from easydict import EasyDict as edict
 
 config = edict()
 
-config.DATABASE_FILE = 'games3.sqlite'
+config.DATABASE_FILE = 'games_new.sqlite'
 config.ANN_FILE = 'ann_from_tags_new.json'
 config.CN2ENG = 'cn2eng.json'
 config.CORPUS_IDF = 'corpus_idf_full.json'
@@ -10,7 +10,7 @@ config.QUERIES = 'test_queries.txt'
 config.MIS_QUERIES = 'mis_test_queries.txt'
 config.STOP_WORD = 'lemur-stopwords.txt'
 config.BASIC_TABLE = '''
-  (SELECT Id, TITLE, DESCRIPTION, DEVELOPER, RELEASE_DATE, REVIEW, SCORE_RATE, ZH_NAME
+  (SELECT Id, TITLE, URL, IMAGE_URL,DESCRIPTION, DEVELOPER, RELEASE_DATE, REVIEW, SCORE_RATE, ZH_NAME
   FROM
     (SELECT TITLE AS game_name, RELEASE_DATE, REVIEW, SCORE_RATE
     FROM GAMES) as t1
